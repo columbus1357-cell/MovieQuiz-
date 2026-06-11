@@ -34,7 +34,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // MARK: - QuestionFactoryDelegate
     func didReceiveNextQuestion(question: QuizQuestion?) {
-        guard let question = question else { return }
+        guard let question else { return }
         
         currentQuestion = question
         let viewModel = convert(model: question)
@@ -67,24 +67,24 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // 3. Показ алерта с результатами раунда
     private func show(quiz result: QuizResultsViewModel) {
-            let alertModel = AlertModel(
-                title: result.title,
-                message: result.text,
-                buttonText: result.buttonText,
-                completion: { [weak self] in
-                    guard let self = self else { return }
-                    
-                  
-                    self.currentQuestionIndex = 0
-                    self.correctAnswers = 0
-                    
+        let alertModel = AlertModel(
+            title: result.title,
+            message: result.text,
+            buttonText: result.buttonText,
+            completion: { [weak self] in
+                guard let self = self else { return }
                 
-                    self.questionFactory?.requestNextQuestion()
-                }
-            )
-            
-            alertPresenter?.showAlert(model: alertModel)
-        }
+                
+                self.currentQuestionIndex = 0
+                self.correctAnswers = 0
+                
+                
+                self.questionFactory?.requestNextQuestion()
+            }
+        )
+        
+        alertPresenter?.showAlert(model: alertModel)
+    }
     
     // 4. Подсветка ответа кастомными цветами и запуск таймера на 1 секунду
     private func showAnswerResult(isCorrect: Bool) {
@@ -111,38 +111,38 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // 5. Логика развилки: следующий вопрос или экран результатов
     private func showNextQuestionOrResults() {
-            if currentQuestionIndex == questionsAmount - 1 {
-                // 1. Сначала сохраняем результат текущей игры в сервис статистики
-                guard let statisticService = statisticService else { return }
-                statisticService.store(correct: correctAnswers, total: questionsAmount)
-                
-                // 2. Достаем обновленные данные для красивого текста
-                let gamesCountText = "Количество сыгранных квизов: \(statisticService.gamesCount)"
-                
-                let bestGame = statisticService.bestGame
-                let bestGameText = "Рекорд: \(bestGame.correct)/\(bestGame.total) (\(bestGame.date.dateTimeString))"
-                
-                let accuracyText = "Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%"
-                
-                // 3. Формируем финальный многострочный текст для алерта (\n — это перенос строки)
-                let text = """
+        if currentQuestionIndex == questionsAmount - 1 {
+            // 1. Сначала сохраняем результат текущей игры в сервис статистики
+            guard let statisticService = statisticService else { return }
+            statisticService.store(correct: correctAnswers, total: questionsAmount)
+            
+            // 2. Достаем обновленные данные для красивого текста
+            let gamesCountText = "Количество сыгранных квизов: \(statisticService.gamesCount)"
+            
+            let bestGame = statisticService.bestGame
+            let bestGameText = "Рекорд: \(bestGame.correct)/\(bestGame.total) (\(bestGame.date.dateTimeString))"
+            
+            let accuracyText = "Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%"
+            
+            // 3. Формируем финальный многострочный текст для алерта (\n — это перенос строки)
+            let text = """
                 Ваш результат: \(correctAnswers)/\(questionsAmount)
                 \(gamesCountText)
                 \(bestGameText)
                 \(accuracyText)
                 """
-                
-                let resultsViewModel = QuizResultsViewModel(
-                    title: "Этот раунд окончен!",
-                    text: text,
-                    buttonText: "Сыграть ещё раз"
-                )
-                show(quiz: resultsViewModel)
-            } else {
-                currentQuestionIndex += 1
-                questionFactory?.requestNextQuestion()
-            }
+            
+            let resultsViewModel = QuizResultsViewModel(
+                title: "Этот раунд окончен!",
+                text: text,
+                buttonText: "Сыграть ещё раз"
+            )
+            show(quiz: resultsViewModel)
+        } else {
+            currentQuestionIndex += 1
+            questionFactory?.requestNextQuestion()
         }
+    }
     
     // MARK: - IBActions
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
