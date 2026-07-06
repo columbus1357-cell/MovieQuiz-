@@ -1,12 +1,14 @@
-//
-//  QuestionFactoryDelegate.swift
-//  MovieQuiz
-//
-//  Created by Aleksandr on 10.06.2026.
-//
+    //
+    //  QuestionFactoryDelegate.swift
+    //  MovieQuiz
+    //
+    //  Created by Aleksandr on 02.07.2026.
+    //
 
-import Foundation
+    import Foundation
 
-protocol QuestionFactoryDelegate: AnyObject {
-    func didReceiveNextQuestion(question: QuizQuestion?)
-}
+    protocol QuestionFactoryDelegate: AnyObject {
+        func didReceiveNextQuestion(question: QuizQuestion?)
+        func didLoadDataFromServer()
+        func didFailToLoadData(with error: Error)
+    }

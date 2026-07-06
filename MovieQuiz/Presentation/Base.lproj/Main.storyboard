@@ -109,10 +109,16 @@
                                     </stackView>
                                 </subviews>
                             </stackView>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" animating="YES" style="large" translatesAutoresizingMaskIntoConstraints="NO" id="pAM-se-eWp">
+                                <rect key="frame" x="188.5" y="443.5" width="37" height="37"/>
+                                <color key="color" name="YP Backgroud"/>
+                            </activityIndicatorView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" name="YP Black"/>
                         <constraints>
+                            <constraint firstItem="pAM-se-eWp" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="4u9-vy-EVj"/>
+                            <constraint firstItem="pAM-se-eWp" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="7y3-sX-aOz"/>
                             <constraint firstItem="qNI-xx-2wF" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="AWp-hN-oCI"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="qNI-xx-2wF" secondAttribute="trailing" constant="20" id="NIL-YG-4aj"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="qNI-xx-2wF" secondAttribute="bottom" id="OqT-6s-DQT"/>
@@ -120,6 +126,7 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="activityIndicator" destination="pAM-se-eWp" id="Wum-dm-NST"/>
                         <outlet property="counterLabel" destination="kN4-SO-hQD" id="npv-bl-VFP"/>
                         <outlet property="imageView" destination="O06-sV-Lwb" id="wUV-B3-mDU"/>
                         <outlet property="textLabel" destination="vFW-gR-fhY" id="DbE-qB-Asl"/>
@@ -131,6 +138,9 @@
         </scene>
     </scenes>
     <resources>
+        <namedColor name="YP Backgroud">
+            <color red="0.10196078431372549" green="0.10588235294117647" blue="0.13333333333333333" alpha="0.60000002384185791" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
         <namedColor name="YP Black">
             <color red="0.10196078431372549" green="0.10588235294117647" blue="0.13333333333333333" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
