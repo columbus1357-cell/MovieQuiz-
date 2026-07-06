@@ -13,7 +13,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private var currentQuestion: QuizQuestion?
     private var alertPresenter: ResultAlertPresenter?
     private var statisticService: StatisticServiceProtocol?
-    
     private var currentQuestionIndex = 0
     private var correctAnswers = 0
     
