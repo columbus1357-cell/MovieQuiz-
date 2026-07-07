@@ -1,8 +1,8 @@
 //
-//  QuestionFactory.swift
-//  MovieQuiz
+//   QuestionFactory.swift
+//   MovieQuiz
 //
-//  Created by Aleksandr on 02.07.2026.
+//   Created by Aleksandr on 02.07.2026.
 //
 
 import Foundation
@@ -12,29 +12,25 @@ class QuestionFactory: QuestionFactoryProtocol {
     private let moviesLoader: MoviesLoading
     weak var delegate: QuestionFactoryDelegate?
     
+    private var movies: [MostPopularMovie] = []
+    
     init(moviesLoader: MoviesLoading, delegate: QuestionFactoryDelegate?) {
         self.moviesLoader = moviesLoader
         self.delegate = delegate
     }
-    private var movies: [MostPopularMovie] = []
-    
     
     func requestNextQuestion() {
-        
         DispatchQueue.global().async { [weak self] in
             guard let self = self else { return }
-            
             
             guard let index = (0..<self.movies.count).randomElement() else {
                 self.delegate?.didReceiveNextQuestion(question: nil)
                 return
             }
-            
-            
+                        
             guard let movie = self.movies[safe: index] else { return }
-            
-            
             var imageData = Data()
+            
             do {
                 imageData = try Data(contentsOf: movie.resizedImageURL)
             } catch {
@@ -42,14 +38,24 @@ class QuestionFactory: QuestionFactoryProtocol {
             }
             
             let rating = Float(movie.rating) ?? 0
-            let randomThreshold = Int.random(in: 5...9)
-            let text = "Рейтинг этого фильма больше чем \(randomThreshold)?"
-            let correctAnswer = rating > Float(randomThreshold)
+            let ratingCeil = Int(rating)
+            let isMoreThanQuestion = Bool.random()
+            let text: String
+            let correctAnswer: Bool
             
+            if isMoreThanQuestion {
+                text = "Рейтинг этого фильма больше чем \(ratingCeil)?"
+                correctAnswer = rating > Float(ratingCeil)
+            } else {
+                text = "Рейтинг этого фильма меньше чем \(ratingCeil + 1)?"
+                correctAnswer = rating < Float(ratingCeil + 1)
+            }
             
-            let question = QuizQuestion(image: imageData,
-                                        text: text,
-                                        correctAnswer: correctAnswer)
+            let question = QuizQuestion(
+                image: imageData,
+                text: text,
+                correctAnswer: correctAnswer
+            )
             
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
@@ -57,10 +63,9 @@ class QuestionFactory: QuestionFactoryProtocol {
             }
         }
     }
+    
     func loadData() {
-        
         moviesLoader.loadMovies { [weak self] result in
-            
             DispatchQueue.main.async {
                 guard let self = self else { return }
                 
@@ -75,4 +80,3 @@ class QuestionFactory: QuestionFactoryProtocol {
         }
     }
 }
-    

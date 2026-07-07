@@ -1,6 +1,6 @@
 import UIKit
 
-final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
+final class MovieQuizViewController: UIViewController {
     
     // MARK: - IBOutlets
     @IBOutlet private weak var imageView: UIImageView!
@@ -21,53 +21,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // Инициализируем сервисы
-        statisticService = StatisticService()
-        alertPresenter = ResultAlertPresenter(delegate: self)
+        setupDependencies()
         
-        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
-        
-        showLoadingIndicator()
+        setLoading(true)
         questionFactory?.loadData()
-    }
-    
-    // MARK: - QuestionFactoryDelegate
-    func didReceiveNextQuestion(question: QuizQuestion?) {
-        guard let question else { return }
-        
-        currentQuestion = question
-        let viewModel = convert(model: question)
-        
-        DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            self.hideLoadingIndicator()
-            self.show(quiz: viewModel)
-        }
-    }
-    
-    func didLoadDataFromServer() {
-        hideLoadingIndicator()
-        questionFactory?.requestNextQuestion()
-    }
-
-    func didFailToLoadData(with error: Error) {
-        hideLoadingIndicator()
-        
-        let alertModel = AlertModel(
-            title: "Ошибка",
-            message: error.localizedDescription,
-            buttonText: "Попробовать еще раз",
-            completion: { [weak self] in
-                guard let self else { return }
-                
-                self.currentQuestionIndex = 0
-                self.correctAnswers = 0
-                self.showLoadingIndicator()
-                self.questionFactory?.loadData()
-            }
-        )
-        
-        alertPresenter?.showAlert(model: alertModel)
     }
     
     // MARK: - Private Methods
@@ -165,24 +122,79 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     // 6. Управление индикатором загрузки
-    private func showLoadingIndicator() {
-        activityIndicator.isHidden = false
-        activityIndicator.startAnimating()
+    private func setLoading(_ isLoading: Bool) {
+        activityIndicator.isHidden = !isLoading
+        
+        if isLoading {
+            activityIndicator.startAnimating()
+        } else {
+            activityIndicator.stopAnimating()
+        }
     }
     
-    private func hideLoadingIndicator() {
-        activityIndicator.isHidden = true
-        activityIndicator.stopAnimating()
+    private func setupDependencies() {
+        statisticService = StatisticService()
+        alertPresenter = ResultAlertPresenter(delegate: self)
+        questionFactory = QuestionFactory(
+            moviesLoader: MoviesLoader(),
+            delegate: self)
+    }
+    
+    private func answerQuestion(with answer: Bool) {
+        guard let currentQuestion else {return}
+        
+        showAnswerResult(
+            isCorrect: currentQuestion.correctAnswer == answer
+        )
     }
     
     // MARK: - IBActions
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
-        guard let currentQuestion = currentQuestion else { return }
-        showAnswerResult(isCorrect: currentQuestion.correctAnswer)
+        answerQuestion(with: true)
     }
     
     @IBAction private func noButtonClicked(_ sender: UIButton) {
-        guard let currentQuestion = currentQuestion else { return }
-        showAnswerResult(isCorrect: !currentQuestion.correctAnswer)
+        answerQuestion(with: false)
+    }
+}
+// MARK: - QuestionFactoryDelegate
+extension MovieQuizViewController: QuestionFactoryDelegate {
+    
+    func didReceiveNextQuestion(question: QuizQuestion?) {
+        guard let question else { return }
+        
+        currentQuestion = question
+        let viewModel = convert(model: question)
+        
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            setLoading(false)
+            show(quiz: viewModel)
+        }
+    }
+    
+    func didLoadDataFromServer() {
+        setLoading(false)
+        questionFactory?.requestNextQuestion()
+    }
+    
+    func didFailToLoadData(with error: Error) {
+        setLoading(false)
+        
+        let alertModel = AlertModel(
+            title: "Ошибка",
+            message: error.localizedDescription,
+            buttonText: "Попробовать еще раз",
+            completion: { [weak self] in
+                guard let self else { return }
+                
+                currentQuestionIndex = 0
+                correctAnswers = 0
+                setLoading(true)
+                questionFactory?.loadData()
+            }
+        )
+        
+        alertPresenter?.showAlert(model: alertModel)
     }
 }
