@@ -5,12 +5,34 @@
 //  Created by Aleksandr on 10.07.2026.
 //
 
-import Testing
+import XCTest
+@testable import MovieQuiz
 
-struct Test {
+// 1. Создаем Мок-объект для тестирования, соответствующий нашему новому протоколу
+final class MovieQuizViewControllerMock: MovieQuizViewControllerProtocol {
+    func show(quiz step: QuizStepViewModel) {}
+    func show(quiz result: QuizResultsViewModel) {}
+    func showAnswerResult(isCorrect: Bool) {}
+    func setLoading(_ isLoading: Bool) {}
+    func showNetworkError(message: String) {}
+}
 
-    @Test func <#test function name#>() async throws {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
+// 2. Сам класс с тестами
+final class MovieQuizPresenterTests: XCTestCase {
+    
+    func testPresenterConvertModel() throws {
+        // Given (Дано)
+        let viewControllerMock = MovieQuizViewControllerMock()
+        let sut = MovieQuizPresenter(viewController: viewControllerMock) // sut — System Under Test
+        
+        let emptyData = Data()
+        let question = QuizQuestion(image: emptyData, text: "Question Text", correctAnswer: true)
+        
+        // When (Когда происходит действие)
+        let viewModel = sut.convert(model: question)
+        
+        // Then (Тогда проверяем результат через Assert'ы)
+        XCTAssertEqual(viewModel.question, "Question Text")
+        XCTAssertEqual(viewModel.questionNumber, "1/10")
     }
-
 }
