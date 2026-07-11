@@ -38,7 +38,6 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
     
     // Подсветка ответа кастомными цветами и запуск таймера на 1 секунду
     func showAnswerResult(isCorrect: Bool) {
-        presenter.didAnswer(isCorrectAnswer: isCorrect)
         
         view.isUserInteractionEnabled = false
         imageView.layer.masksToBounds = true
@@ -52,7 +51,7 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             guard let self else { return }
             view.isUserInteractionEnabled = true
-            showNextQuestionOrResults()
+                presenter.showNextQuestionOrResults()
         }
     }
     
@@ -96,36 +95,6 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
             }
         )
         alertPresenter?.showAlert(model: alertModel)
-    }
-    
-    // Логика развилки: следующий вопрос или экран результатов
-    private func showNextQuestionOrResults() {
-        if presenter.isLastQuestion() {
-            let statisticService = presenter.statisticService
-            statisticService.store(correct: presenter.correctAnswers, total: 10)
-            
-            let gamesCountText = "Количество сыгранных квизов: \(statisticService.gamesCount)"
-            let bestGame = statisticService.bestGame
-            let bestGameText = "Рекорд: \(bestGame.correct)/\(bestGame.total) (\(bestGame.date.dateTimeString))"
-            let accuracyText = "Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%"
-            
-            let text = """
-                Ваш результат: \(presenter.correctAnswers)/10
-                \(gamesCountText)
-                \(bestGameText)
-                \(accuracyText)
-                """
-            
-            let resultsViewModel = QuizResultsViewModel(
-                title: "Этот раунд окончен!",
-                text: text,
-                buttonText: "Сыграть ещё раз"
-            )
-            show(quiz: resultsViewModel)
-        } else {
-            presenter.switchToNextQuestion()
-            presenter.requestNextQuestion()
-        }
     }
     
     private func setupDependencies() {

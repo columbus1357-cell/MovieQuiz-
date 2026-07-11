@@ -81,20 +81,54 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         didAnswer(isYes: false)
     }
     
-    func didAnswer(isCorrectAnswer: Bool) {
-        if isCorrectAnswer {
-            correctAnswers += 1
-        }
-    }
     
     func requestNextQuestion() {
         questionFactory?.requestNextQuestion()
+    }
+    
+    func showNextQuestionOrResults() {
+        if isLastQuestion() {
+            // 1. Презентер сам считает и сохраняет статистику
+            statisticService.store(correct: correctAnswers, total: questionsAmount)
+            
+            // 2. Формирует текст для алерта
+            let gamesCountText = "Количество сыгранных квизов: \(statisticService.gamesCount)"
+            let bestGame = statisticService.bestGame
+            let bestGameText = "Рекорд: \(bestGame.correct)/\(bestGame.total) (\(bestGame.date.dateTimeString))"
+            let accuracyText = "Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%"
+            
+            let text = """
+                Ваш результат: \(correctAnswers)/\(questionsAmount)
+                \(gamesCountText)
+                \(bestGameText)
+                \(accuracyText)
+                """
+            
+            let resultsViewModel = QuizResultsViewModel(
+                title: "Этот раунд окончен!",
+                text: text,
+                buttonText: "Сыграть ещё раз"
+            )
+            
+            // 3. Отдаёт контроллеру команду «покажи результат»
+            viewController?.show(quiz: resultsViewModel)
+        } else {
+            // Если игра продолжается, презентер переключает индекс и запрашивает вопрос
+            switchToNextQuestion()
+            requestNextQuestion()
+        }
     }
     
     // MARK: - Private Methods
     private func didAnswer(isYes: Bool) {
         guard let  currentQuestion else { return }
         let givenAnswer = isYes
-        viewController?.showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+        let isCorrect = givenAnswer == currentQuestion.correctAnswer
+        
+        if isCorrect {
+            correctAnswers += 1
+        }
+        
+        viewController?.showAnswerResult(isCorrect: isCorrect)
     }
 }
