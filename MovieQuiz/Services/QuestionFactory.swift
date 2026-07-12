@@ -21,7 +21,7 @@ class QuestionFactory: QuestionFactoryProtocol {
     
     func requestNextQuestion() {
         DispatchQueue.global().async { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             
             guard let index = (0..<self.movies.count).randomElement() else {
                 self.delegate?.didReceiveNextQuestion(question: nil)
@@ -38,17 +38,20 @@ class QuestionFactory: QuestionFactoryProtocol {
             }
             
             let rating = Float(movie.rating) ?? 0
-            let ratingCeil = Int(rating)
+            
+            // Генерируем случайное число для сравнения рейтинга
+            let randomCompareRating = Int.random(in: 7...9)
             let isMoreThanQuestion = Bool.random()
+            
             let text: String
             let correctAnswer: Bool
             
             if isMoreThanQuestion {
-                text = "Рейтинг этого фильма больше чем \(ratingCeil)?"
-                correctAnswer = rating > Float(ratingCeil)
+                text = "Рейтинг этого фильма больше чем \(randomCompareRating)?"
+                correctAnswer = rating > Float(randomCompareRating)
             } else {
-                text = "Рейтинг этого фильма меньше чем \(ratingCeil + 1)?"
-                correctAnswer = rating < Float(ratingCeil + 1)
+                text = "Рейтинг этого фильма меньше чем \(randomCompareRating)?"
+                correctAnswer = rating < Float(randomCompareRating)
             }
             
             let question = QuizQuestion(

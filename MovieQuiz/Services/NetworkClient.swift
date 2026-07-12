@@ -1,6 +1,10 @@
 import Foundation
 
-struct NetworkClient {
+protocol NetworkRouting {
+    func fetch(url: URL, handler: @escaping (Result<Data, Error>) -> Void)
+}
+
+struct NetworkClient: NetworkRouting {
 
     // 1. Создаем ошибку на случай, если сервер вернет плохой статус-код
     private enum NetworkError: Error {
